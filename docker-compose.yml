@@ -1,0 +1,22 @@
+version: '3'
+services:
+    mongo:
+        image: mongo:latest
+        container_name: mongo
+        ports:
+            - '80:80'
+        environment:
+            MONGO_INITDB_DATABASE: image-repository-api
+        volumes:
+            - data-volume:/data/db
+    api:
+        container_name: api
+        build: .
+        ports:
+            - '9000:9000'
+        volumes:
+            - .:/app
+        links:
+            - mongo
+volumes:
+    data-volume:
