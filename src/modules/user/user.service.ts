@@ -1,7 +1,7 @@
 import {
     BadRequestException,
     Injectable,
-    NotAcceptableException,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,6 +9,7 @@ import { AppRoles } from '../app/app.roles';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDocument } from './user.schema';
 import bcrypt from 'bcryptjs';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UserService {
@@ -24,21 +25,6 @@ export class UserService {
         return this.userModel.findOne({ email }).exec();
     }
 
-    async create(payload: CreateUserDto): Promise<UserDocument> {
-        const user = await this.getByEmail(payload.email);
-        if (user) {
-            throw new NotAcceptableException('The email is already in use.');
-        }
-
-        const createdProfile = new this.userModel({
-            ...payload,
-            password: bcrypt.hashSync(payload.password, 8),
-            roles: payload.roles ? payload.roles : [AppRoles.USER],
-        });
-
-        return createdProfile.save();
-    }
-
     async delete(
         email: string,
     ): Promise<{
@@ -52,5 +38,58 @@ export class UserService {
                 `Failed to delete user with email: ${email}.`,
             );
         }
+    }
+
+    async create(createUserDto: CreateUserDto) {
+        const { email, name, password, roles: receivedRoles } = createUserDto;
+        const user = new this.userModel({
+            email,
+            name,
+            password,
+            roles: receivedRoles ? receivedRoles : [AppRoles.USER],
+        });
+        await this.isEmailUnique(user.email);
+        await user.save();
+        return this.generateResponse(user);
+    }
+
+    async login(loginUserDto: LoginUserDto) {
+        const user = await this.findUserByEmail(loginUserDto.email);
+        await this.checkPassword(loginUserDto.password, user);
+        return this.generateResponse(user);
+    }
+
+    private async isEmailUnique(email: string): Promise<void> {
+        const user = await this.userModel.findOne({ email, verified: true });
+        if (user) {
+            throw new BadRequestException('Email most be unique.');
+        }
+    }
+
+    private async findUserByEmail(email: string): Promise<UserDocument> {
+        const user = await this.userModel.findOne({ email, verified: true });
+        if (!user) {
+            throw new NotFoundException('Wrong email or password.');
+        }
+        return user;
+    }
+
+    private async checkPassword(
+        attemptPass: string,
+        user: UserDocument,
+    ): Promise<boolean> {
+        const match = await bcrypt.compare(attemptPass, user.password);
+        if (!match) {
+            throw new NotFoundException('Wrong email or password.');
+        }
+        return true;
+    }
+
+    private generateResponse(user: UserDocument) {
+        return {
+            name: user.name,
+            email: user.email,
+            // accessToken: await this.authService.createAccessToken(user._id),
+        };
     }
 }
