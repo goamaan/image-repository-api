@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { AppRoles } from '../app/app.roles';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDocument } from './user.schema';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthService } from '../auth/auth.service';
 
@@ -30,14 +30,16 @@ export class UserService {
     async register(createUserDto: CreateUserDto) {
         const { email, name, password, roles: receivedRoles } = createUserDto;
 
-        const user = await this.userModel.create({
+        await this.isEmailUnique(email);
+        const user = new this.userModel({
             email,
             name,
-            password,
+            password: bcrypt.hashSync(password, 10),
             roles: receivedRoles ? receivedRoles : [AppRoles.USER],
         });
-        await this.isEmailUnique(user.email);
+
         await user.save();
+
         return this.generateResponse(user);
     }
 
@@ -48,14 +50,14 @@ export class UserService {
     }
 
     private async isEmailUnique(email: string): Promise<void> {
-        const user = await this.userModel.findOne({ email, verified: true });
+        const user = await this.userModel.findOne({ email });
         if (user) {
-            throw new BadRequestException('Email most be unique.');
+            throw new BadRequestException('Email must be unique.');
         }
     }
 
     private async findUserByEmail(email: string): Promise<UserDocument> {
-        const user = await this.userModel.findOne({ email, verified: true });
+        const user = await this.userModel.findOne({ email });
         if (!user) {
             throw new NotFoundException('Wrong email or password.');
         }
@@ -75,6 +77,7 @@ export class UserService {
 
     private async generateResponse(user: UserDocument) {
         return {
+            id: user._id,
             name: user.name,
             email: user.email,
             accessToken: await this.authService.createAccessToken(user),

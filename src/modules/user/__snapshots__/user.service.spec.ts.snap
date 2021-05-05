@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserService should not register user if validation error 1`] = `"User validation failed: email: Validator failed for path \`email\` with value \`test.com\`"`;
