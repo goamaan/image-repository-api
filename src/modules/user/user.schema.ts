@@ -14,7 +14,7 @@ export class User {
         required: [true, 'Email cannot be blank'],
         validate: validator.isEmail,
     })
-    email: number;
+    email: string;
 
     @Prop({
         required: [true, 'Password cannot be blank'],
@@ -23,7 +23,7 @@ export class User {
     })
     password: string;
 
-    @Prop({ default: ['user'] })
+    @Prop({ default: ['USER'] })
     roles: string[];
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }] })
