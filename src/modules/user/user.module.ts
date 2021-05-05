@@ -5,6 +5,7 @@ import { UserController } from './user.controller';
 import { UserDocument, UserSchema } from './user.schema';
 import { UserService } from './user.service';
 import * as bcrypt from 'bcryptjs';
+import { AuthService } from '../auth/auth.service';
 
 @Module({
     imports: [
@@ -31,6 +32,6 @@ import * as bcrypt from 'bcryptjs';
         AuthModule,
     ],
     controllers: [UserController],
-    providers: [UserService],
+    providers: [UserService, AuthService],
 })
 export class UserModule {}

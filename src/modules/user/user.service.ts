@@ -29,7 +29,8 @@ export class UserService {
 
     async register(createUserDto: CreateUserDto) {
         const { email, name, password, roles: receivedRoles } = createUserDto;
-        const user = new this.userModel({
+
+        const user = await this.userModel.create({
             email,
             name,
             password,
