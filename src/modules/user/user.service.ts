@@ -10,11 +10,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserDocument } from './user.schema';
 import bcrypt from 'bcryptjs';
 import { LoginUserDto } from './dto/login-user.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<UserDocument>,
+        private readonly authService: AuthService,
     ) {}
 
     get(id: string): Promise<UserDocument> {
@@ -25,22 +27,7 @@ export class UserService {
         return this.userModel.findOne({ email }).exec();
     }
 
-    async delete(
-        email: string,
-    ): Promise<{
-        message: string;
-    }> {
-        const profile = await this.userModel.deleteOne({ email });
-        if (profile.deletedCount === 1) {
-            return { message: `Deleted user with email: ${email}` };
-        } else {
-            throw new BadRequestException(
-                `Failed to delete user with email: ${email}.`,
-            );
-        }
-    }
-
-    async create(createUserDto: CreateUserDto) {
+    async register(createUserDto: CreateUserDto) {
         const { email, name, password, roles: receivedRoles } = createUserDto;
         const user = new this.userModel({
             email,
@@ -75,21 +62,36 @@ export class UserService {
     }
 
     private async checkPassword(
-        attemptPass: string,
+        password: string,
         user: UserDocument,
     ): Promise<boolean> {
-        const match = await bcrypt.compare(attemptPass, user.password);
+        const match = await bcrypt.compare(password, user.password);
         if (!match) {
             throw new NotFoundException('Wrong email or password.');
         }
         return true;
     }
 
-    private generateResponse(user: UserDocument) {
+    private async generateResponse(user: UserDocument) {
         return {
             name: user.name,
             email: user.email,
-            // accessToken: await this.authService.createAccessToken(user._id),
+            accessToken: await this.authService.createAccessToken(user),
         };
+    }
+
+    private async delete(
+        email: string,
+    ): Promise<{
+        message: string;
+    }> {
+        const profile = await this.userModel.deleteOne({ email });
+        if (profile.deletedCount === 1) {
+            return { message: `Deleted user with email: ${email}` };
+        } else {
+            throw new BadRequestException(
+                `Failed to delete user with email: ${email}.`,
+            );
+        }
     }
 }

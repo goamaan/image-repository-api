@@ -26,6 +26,6 @@ describe('ConfigService', () => {
             'mongodb://localhost/image-repository-api',
         );
         expect(service.get('JWT_SECRET_KEY')).toEqual('a8Nc08LkmQ');
-        expect(service.get('JWT_EXPIRATION_TIME')).toEqual(2400);
+        expect(service.get('JWT_EXPIRATION_TIME')).toEqual('2d');
     });
 });

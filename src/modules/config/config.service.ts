@@ -21,7 +21,7 @@ export class ConfigService {
                 scheme: [/https?/],
             }),
             JWT_SECRET_KEY: joi.string().required(),
-            JWT_EXPIRATION_TIME: joi.number().default(1800),
+            JWT_EXPIRATION_TIME: joi.string().required(),
             DB_URL: joi.string().regex(/^mongodb/),
             AWS_S3_BUCKET: joi.string().required(),
             AWS_ACCESS_KEY_ID: joi.string().required(),
