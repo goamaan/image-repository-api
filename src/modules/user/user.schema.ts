@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import * as mongoose from 'mongoose';
 import validator from 'validator';
+import { Image } from '../image/image.schema';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & mongoose.Document;
 
 @Schema({ timestamps: true })
 export class User {
@@ -24,6 +25,9 @@ export class User {
 
     @Prop({ default: ['user'] })
     roles: string[];
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }] })
+    images: Image[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
