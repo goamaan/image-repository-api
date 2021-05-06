@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AwsService } from '../aws/aws.service';
 import { ImageDocument } from './image.schema';
 import { UploadImageDto } from './dto/upload-image.dto';
 import { UserDocument } from '../user/user.schema';
+import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 
 @Injectable()
 export class ImageService {
@@ -20,14 +25,13 @@ export class ImageService {
         uploadImageDto: UploadImageDto,
     ) {
         const tags = uploadImageDto.tags;
-        if (files.length === 0 || tags.length === 0) {
+        if (
+            files.length === 0 ||
+            tags.length === 0 ||
+            files.length !== tags.length
+        ) {
             throw new BadRequestException(
-                `Number of files and tags must be greater than 0`,
-            );
-        }
-        if (files.length !== tags.length) {
-            throw new BadRequestException(
-                `Number of files must equal number of tags, instead found ${files.length} files and ${uploadImageDto.tags.length} tags`,
+                `Number of files and tags must be greater than 0, and equal - instead found ${files.length} files and ${tags.length} tags`,
             );
         }
 
@@ -50,6 +54,26 @@ export class ImageService {
         });
 
         return uploadResults;
+    }
+
+    async deleteMany(req, deleteManyImagesDto: DeleteManyImagesDto) {
+        const { email } = req.user;
+        const images = await this.imageModel
+            .find({ _id: { $in: deleteManyImagesDto.ids } })
+            .populate('owner');
+        if (!images.every((img) => email === img.owner.email)) {
+            throw new ForbiddenException('You may only delete your own images');
+        }
+
+        const keys = images.map((img) => img.key);
+        const deleteResponse = await this.awsService.deleteMany(keys);
+        await this.imageModel
+            .deleteMany()
+            .where('_id')
+            .in(deleteManyImagesDto.ids)
+            .exec();
+
+        return { deleted: true, deleteResponse };
     }
 
     private checkFileType(filename: string) {

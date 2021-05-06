@@ -44,4 +44,24 @@ export class AwsService {
 
         return uploadResult;
     }
+
+    async deleteMany(keys: string[]) {
+        const s3 = new Aws.S3({
+            credentials: {
+                accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: this.configService.get('AWS_SECRET_KEY'),
+            },
+        });
+        const promises = keys.map((key) =>
+            s3
+                .deleteObject({
+                    Bucket: this.configService.get('AWS_S3_BUCKET'),
+                    Key: key,
+                })
+                .promise(),
+        );
+
+        const deleteResponse = await Promise.all(promises);
+        return deleteResponse;
+    }
 }

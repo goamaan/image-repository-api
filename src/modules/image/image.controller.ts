@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Delete,
     HttpCode,
     HttpStatus,
     Post,
@@ -12,6 +13,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { UploadImageDto } from './dto/upload-image.dto';
+import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import { ImageService } from './image.service';
 
 @Controller('api/v1/images')
@@ -27,5 +29,14 @@ export class ImageController {
         @Body() uploadImageDto: UploadImageDto,
     ) {
         return this.imageService.upload(req, files, uploadImageDto);
+    }
+
+    @Delete()
+    @HttpCode(HttpStatus.OK)
+    async deleteMany(
+        @Req() req,
+        @Body() deleteManyImagesDto: DeleteManyImagesDto,
+    ) {
+        return this.imageService.deleteMany(req, deleteManyImagesDto);
     }
 }

@@ -82,19 +82,4 @@ export class UserService {
             accessToken: await this.authService.createAccessToken(user),
         };
     }
-
-    private async delete(
-        email: string,
-    ): Promise<{
-        message: string;
-    }> {
-        const profile = await this.userModel.deleteOne({ email });
-        if (profile.deletedCount === 1) {
-            return { message: `Deleted user with email: ${email}` };
-        } else {
-            throw new BadRequestException(
-                `Failed to delete user with email: ${email}.`,
-            );
-        }
-    }
 }
