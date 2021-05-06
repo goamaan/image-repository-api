@@ -85,6 +85,10 @@ export class ImageService {
             .where('_id')
             .in(deleteManyImagesDto.ids)
             .exec();
+        await this.userModel.findOneAndUpdate(
+            { _id: req.user.userId },
+            { $pull: { images: { $in: deleteManyImagesDto.ids } } },
+        );
 
         return { deleted: true, deleteResponse };
     }
@@ -105,6 +109,10 @@ export class ImageService {
 
         const deleteResponse = await this.awsService.deleteOne(image.key);
         await this.imageModel.findByIdAndDelete(id);
+        await this.userModel.findOneAndUpdate(
+            { _id: req.user.userId },
+            { $pull: { images: id } },
+        );
         return { deleted: true, deleteResponse };
     }
 

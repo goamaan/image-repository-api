@@ -12,7 +12,6 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
 import { UploadImageDto } from './dto/upload-image.dto';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import { ImageService } from './image.service';
