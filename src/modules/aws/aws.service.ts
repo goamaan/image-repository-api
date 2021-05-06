@@ -33,10 +33,11 @@ export class AwsService {
 
         const uploadResponse = await Promise.all(promises);
 
-        const uploadResult = uploadResponse.map((res) => ({
+        const uploadResult = uploadResponse.map((res, i) => ({
             url: res.Location,
             key: res.Key,
             owner: userId,
+            tag: tags[i],
             isPublic,
         }));
 

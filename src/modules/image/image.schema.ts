@@ -22,8 +22,8 @@ export class Image {
     })
     url: string;
 
-    @Prop({ default: [] })
-    tags: string[];
+    @Prop({ default: '' })
+    tag: string;
 }
 
 export const ImageSchema = SchemaFactory.createForClass(Image);
