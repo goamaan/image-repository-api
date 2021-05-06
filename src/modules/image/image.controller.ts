@@ -16,6 +16,7 @@ import { UploadImageDto } from './dto/upload-image.dto';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import { ImageService } from './image.service';
 import { UpdateImageDto } from './dto/update-image.dto';
+import { RequestWithUser } from 'src/utils/RequestWithUser';
 
 @Controller('api/v1/images')
 export class ImageController {
@@ -25,7 +26,7 @@ export class ImageController {
     @UseInterceptors(FilesInterceptor('file'))
     @HttpCode(HttpStatus.CREATED)
     async create(
-        @Req() req,
+        @Req() req: RequestWithUser,
         @UploadedFiles() files: Express.Multer.File[],
         @Body() uploadImageDto: UploadImageDto,
     ) {
@@ -35,7 +36,7 @@ export class ImageController {
     @Delete()
     @HttpCode(HttpStatus.OK)
     async deleteMany(
-        @Req() req,
+        @Req() req: RequestWithUser,
         @Body() deleteManyImagesDto: DeleteManyImagesDto,
     ) {
         return this.imageService.deleteMany(req, deleteManyImagesDto);
@@ -43,14 +44,14 @@ export class ImageController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.OK)
-    async deleteOne(@Req() req, @Param('id') id: string) {
+    async deleteOne(@Req() req: RequestWithUser, @Param('id') id: string) {
         return this.imageService.deleteOne(req, id);
     }
 
     @Put(':id')
     @HttpCode(HttpStatus.OK)
     async updateOne(
-        @Req() req,
+        @Req() req: RequestWithUser,
         @Param('id') id: string,
         @Body() updateImageDto: UpdateImageDto,
     ) {

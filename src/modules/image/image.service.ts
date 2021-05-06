@@ -13,6 +13,7 @@ import { UserDocument } from '../user/user.schema';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import * as mongoose from 'mongoose';
 import { UpdateImageDto } from './dto/update-image.dto';
+import { RequestWithUser } from 'src/utils/RequestWithUser';
 
 @Injectable()
 export class ImageService {
@@ -23,7 +24,7 @@ export class ImageService {
     ) {}
 
     async upload(
-        req,
+        req: RequestWithUser,
         files: Express.Multer.File[],
         uploadImageDto: UploadImageDto,
     ) {
@@ -46,20 +47,23 @@ export class ImageService {
             tags,
             uploadImageDto.isPublic,
         );
-
-        uploadResults.forEach(async (res) => {
-            await new this.imageModel(res).save().then(async (image) => {
-                await this.userModel.findOneAndUpdate(
-                    { _id: req.user.userId },
-                    { $push: { images: image } },
-                );
-            });
+        const responseWithIdPromise = uploadResults.map(async (res) => {
+            const image = await new this.imageModel(res).save();
+            await this.userModel.findOneAndUpdate(
+                { _id: req.user.userId },
+                { $push: { images: image } },
+            );
+            return { id: image._id, ...res };
         });
+        const responseWIthIds = Promise.all(responseWithIdPromise);
 
-        return uploadResults;
+        return responseWIthIds;
     }
 
-    async deleteMany(req, deleteManyImagesDto: DeleteManyImagesDto) {
+    async deleteMany(
+        req: RequestWithUser,
+        deleteManyImagesDto: DeleteManyImagesDto,
+    ) {
         const { email } = req.user;
 
         deleteManyImagesDto.ids.forEach((id) => this.checkIdValidity(id));
@@ -93,7 +97,7 @@ export class ImageService {
         return { deleted: true, deleteResponse };
     }
 
-    async deleteOne(req, id: string) {
+    async deleteOne(req: RequestWithUser, id: string) {
         const { email } = req.user;
 
         this.checkIdValidity(id);
@@ -116,7 +120,11 @@ export class ImageService {
         return { deleted: true, deleteResponse };
     }
 
-    async updateOne(req, id: string, updateImageDto: UpdateImageDto) {
+    async updateOne(
+        req: RequestWithUser,
+        id: string,
+        updateImageDto: UpdateImageDto,
+    ) {
         const { email } = req.user;
 
         this.checkIdValidity(id);
