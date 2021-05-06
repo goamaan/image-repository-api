@@ -1,6 +1,5 @@
 import {
     Controller,
-    Get,
     Post,
     Body,
     Req,
@@ -28,6 +27,7 @@ export class UserController {
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(@Req() req: Request, @Body() loginUserDto: LoginUserDto) {
+        console.log(req.user);
         return await this.userService.login(loginUserDto);
     }
 }

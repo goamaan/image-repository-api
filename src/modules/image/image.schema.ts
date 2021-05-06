@@ -7,17 +7,20 @@ export type ImageDocument = Image & mongoose.Document;
 
 @Schema({ timestamps: true })
 export class Image {
-    @Prop({ required: [true, 'Name cannot be blank'] })
+    @Prop({ required: true })
     name: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Owner' })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     owner: User;
+
+    @Prop({ required: true })
+    key: string;
 
     @Prop({ default: true })
     isPublic: boolean;
 
     @Prop({
-        required: [true, 'URL cannot be blank'],
+        required: true,
         validate: validator.isURL,
     })
     url: string;

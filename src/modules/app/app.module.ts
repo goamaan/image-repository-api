@@ -8,6 +8,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ImageModule } from '../image/image.module';
+import { AwsModule } from '../aws/aws.module';
 
 @Module({
     imports: [
@@ -19,11 +21,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
                     uri: configService.get('DB_URL'),
                     useNewUrlParser: true,
                     useUnifiedTopology: true,
+                    useFindAndModify: false,
                 } as MongooseModuleAsyncOptions),
         }),
         ConfigModule,
         AuthModule,
         UserModule,
+        ImageModule,
+        AwsModule,
     ],
     controllers: [AppController],
     providers: [

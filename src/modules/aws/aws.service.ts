@@ -22,9 +22,9 @@ export class AwsService {
             s3
                 .upload({
                     Bucket: this.configService.get('AWS_S3_BUCKET'),
-                    Key: `user-images/${userId}-${
+                    Key: `user-images/${userId}-${new Date().toISOString()}-${
                         file.originalname
-                    }-${new Date().toISOString()}`,
+                    }`,
                     Body: file.buffer,
                     ContentType: file.mimetype,
                 })
@@ -35,6 +35,7 @@ export class AwsService {
 
         const uploadResult = uploadResponse.map((res, i) => ({
             url: res.Location,
+            name: files[i].originalname,
             key: res.Key,
             owner: userId,
             tag: tags[i],
