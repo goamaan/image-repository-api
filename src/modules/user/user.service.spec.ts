@@ -50,7 +50,6 @@ describe('UserService', () => {
     /*
         REGISTER TESTS
     */
-
     const mockCreateUserNoRole: CreateUserDto = {
         name: 'test',
         email: 'test@gmail.com',
@@ -111,7 +110,6 @@ describe('UserService', () => {
     /*
         LOGIN TESTS
     */
-
     const mockLoginUserValid: LoginUserDto = {
         email: 'test@gmail.com',
         password: 'test123',
