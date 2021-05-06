@@ -53,7 +53,7 @@ export class ImageService {
                 { _id: req.user.userId },
                 { $push: { images: image } },
             );
-            return { id: image._id, ...res };
+            return { _id: image._id, ...res };
         });
         const responseWIthIds = Promise.all(responseWithIdPromise);
 

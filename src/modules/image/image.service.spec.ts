@@ -12,6 +12,8 @@ import { ImageDocument, ImageSchema } from './image.schema';
 import { UserDocument, UserSchema } from '../user/user.schema';
 import { ConfigModule } from '../config/config.module';
 import { RequestWithUser } from 'src/utils/RequestWithUser';
+import { UpdateImageDto } from './dto/update-image.dto';
+import * as mongoose from 'mongoose';
 
 describe('UserService', () => {
     let service: ImageService;
@@ -21,38 +23,42 @@ describe('UserService', () => {
     const mockRequest = {
         user: {
             email: 'test@test.com',
-            userId: 'fsfsfsfsg',
+            userId: '609443f8c88073579a600a49',
         },
     };
 
     const mockData = {
-        users: [
-            {
-                id: '609443f8c88073579a600a49',
-                name: 'test',
-                email: 'test@test.com',
-                accessToken:
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ1c2VySWQiOiI2MDk0NDNmOGM4ODA3MzU3OWE2MDBhNDkiLCJpYXQiOjE2MjAzMjk0NjQsImV4cCI6MTYyMDUwMjI2NH0.AquJ0AisWfSwCCvY3kDLzi9v23o_Gt9nVO6lEFp7l2w',
-            },
-        ],
-        images: [
-            {
-                url:
-                    'https://image-repository-api.s3.amazonaws.com/user-images/609443f8c88073579a600a49-2021-05-06T19%3A32%3A04.834Z-me_in_capilano.jpg',
-                name: 'me_in_capilano.jpg',
-                key:
-                    'user-images/609443f8c88073579a600a49-2021-05-06T19:32:04.834Z-me_in_capilano.jpg',
-                owner: '609443f8c88073579a600a49',
-                tag: 'amaan',
-                isPublic: 'true',
-            },
-        ],
+        user: {
+            _id: '609443f8c88073579a600a49',
+            images: [],
+            roles: ['USER'],
+            email: 'test@test.com',
+            name: 'test',
+            password:
+                '$2a$10$UZHoHEcVA926JAOYXMBQN.GjXJjUhDheMkQrXDYkf.T2GaSs5S7Wa',
+        },
+        image: {
+            _id: '60944aa9b5315a60c8e5d7f8',
+            url:
+                'https://image-repository-api.s3.ca-central-1.amazonaws.com/user-images/609443f8c88073579a600a49-2021-05-06T19%3A59%3A16.738Z-me_in_capilano.jpg',
+            name: 'me_in_capilano.jpg',
+            key:
+                'user-images/609443f8c88073579a600a49-2021-05-06T19:59:16.738Z-me_in_capilano.jpg',
+            owner: '609443f8c88073579a600a49',
+            tag: 'amaan',
+            isPublic: 'true',
+        },
+    };
+
+    const mockUpdate: UpdateImageDto = {
+        isPublic: false,
+        tag: 'newAmaan',
     };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [
-                rootMongooseTestModule(),
+                rootMongooseTestModule({ useFindAndModify: false }),
                 MongooseModule.forFeature([
                     {
                         name: 'Image',
@@ -72,6 +78,8 @@ describe('UserService', () => {
         service = module.get<ImageService>(ImageService);
         imageModel = module.get<Model<ImageDocument>>('ImageModel');
         userModel = module.get<Model<UserDocument>>('UserModel');
+        await userModel.create(mockData.user);
+        await imageModel.create(mockData.image);
     });
 
     afterEach(async () => {
@@ -87,7 +95,25 @@ describe('UserService', () => {
         expect(service).toBeDefined();
     });
 
-    // it('should delete one image', () => {
-    //     expect(service.deleteOne(mockRequest as RequestWithUser));
-    // });
+    it('should update one image', () => {
+        expect(
+            service.updateOne(
+                mockRequest as RequestWithUser,
+                mockData.image._id,
+                mockUpdate,
+            ),
+        ).resolves.toEqual({
+            updatedImage: {
+                _id: '60944aa9b5315a60c8e5d7f8',
+                url:
+                    'https://image-repository-api.s3.ca-central-1.amazonaws.com/user-images/609443f8c88073579a600a49-2021-05-06T19%3A59%3A16.738Z-me_in_capilano.jpg',
+                name: 'me_in_capilano.jpg',
+                key:
+                    'user-images/609443f8c88073579a600a49-2021-05-06T19:59:16.738Z-me_in_capilano.jpg',
+                owner: '609443f8c88073579a600a49',
+                tag: 'newAmaan',
+                isPublic: 'false',
+            },
+        });
+    });
 });
