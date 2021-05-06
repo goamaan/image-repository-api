@@ -2,6 +2,7 @@ import {
     BadRequestException,
     ForbiddenException,
     Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -10,6 +11,7 @@ import { ImageDocument } from './image.schema';
 import { UploadImageDto } from './dto/upload-image.dto';
 import { UserDocument } from '../user/user.schema';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ImageService {
@@ -58,9 +60,17 @@ export class ImageService {
 
     async deleteMany(req, deleteManyImagesDto: DeleteManyImagesDto) {
         const { email } = req.user;
-        const images = await this.imageModel
-            .find({ _id: { $in: deleteManyImagesDto.ids } })
-            .populate('owner');
+
+        deleteManyImagesDto.ids.forEach((id) => this.checkIdValidity(id));
+
+        const images = await this.imageModel.find({
+            _id: { $in: deleteManyImagesDto.ids },
+        });
+
+        if (!images) {
+            throw new NotFoundException('Id not found');
+        }
+
         if (!images.every((img) => email === img.owner.email)) {
             throw new ForbiddenException('You may only delete your own images');
         }
@@ -74,6 +84,31 @@ export class ImageService {
             .exec();
 
         return { deleted: true, deleteResponse };
+    }
+
+    async deleteOne(req, id: string) {
+        const { email } = req.user;
+
+        this.checkIdValidity(id);
+        const image = await this.imageModel.findById(id);
+
+        if (!image) {
+            throw new NotFoundException('Id not found');
+        }
+
+        if (image.owner.email !== email) {
+            throw new ForbiddenException('You may only delete your own images');
+        }
+
+        const deleteResponse = await this.awsService.deleteOne(image.key);
+        await this.imageModel.findByIdAndDelete(id);
+        return { deleted: true, deleteResponse };
+    }
+
+    private checkIdValidity(id: string) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new BadRequestException(`${id} is not a valid Object Id`);
+        }
     }
 
     private checkFileType(filename: string) {

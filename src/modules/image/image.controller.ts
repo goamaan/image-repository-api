@@ -5,6 +5,7 @@ import {
     Delete,
     HttpCode,
     HttpStatus,
+    Param,
     Post,
     Req,
     UploadedFiles,
@@ -38,5 +39,11 @@ export class ImageController {
         @Body() deleteManyImagesDto: DeleteManyImagesDto,
     ) {
         return this.imageService.deleteMany(req, deleteManyImagesDto);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.OK)
+    async deleteOne(@Req() req, @Param('id') id: string) {
+        return this.imageService.deleteOne(req, id);
     }
 }

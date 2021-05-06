@@ -64,4 +64,21 @@ export class AwsService {
         const deleteResponse = await Promise.all(promises);
         return deleteResponse;
     }
+
+    async deleteOne(key: string) {
+        const s3 = new Aws.S3({
+            credentials: {
+                accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: this.configService.get('AWS_SECRET_KEY'),
+            },
+        });
+
+        const deleteResponse = await s3
+            .deleteObject({
+                Bucket: this.configService.get('AWS_S3_BUCKET'),
+                Key: key,
+            })
+            .promise();
+        return deleteResponse;
+    }
 }
