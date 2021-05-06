@@ -8,6 +8,7 @@ import {
     HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { Public } from '../auth/decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserService } from './user.service';
@@ -16,12 +17,14 @@ import { UserService } from './user.service';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    @Public()
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
     async register(@Body() createUserDto: CreateUserDto) {
         return await this.userService.register(createUserDto);
     }
 
+    @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(@Req() req: Request, @Body() loginUserDto: LoginUserDto) {
