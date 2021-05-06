@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -7,6 +6,7 @@ import {
     HttpStatus,
     Param,
     Post,
+    Put,
     Req,
     UploadedFiles,
     UseInterceptors,
@@ -16,6 +16,7 @@ import { Request } from 'express';
 import { UploadImageDto } from './dto/upload-image.dto';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import { ImageService } from './image.service';
+import { UpdateImageDto } from './dto/update-image.dto';
 
 @Controller('api/v1/images')
 export class ImageController {
@@ -45,5 +46,15 @@ export class ImageController {
     @HttpCode(HttpStatus.OK)
     async deleteOne(@Req() req, @Param('id') id: string) {
         return this.imageService.deleteOne(req, id);
+    }
+
+    @Put(':id')
+    @HttpCode(HttpStatus.OK)
+    async updateOne(
+        @Req() req,
+        @Param('id') id: string,
+        @Body() updateImageDto: UpdateImageDto,
+    ) {
+        return this.imageService.updateOne(req, id, updateImageDto);
     }
 }

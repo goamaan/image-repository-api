@@ -12,6 +12,7 @@ import { UploadImageDto } from './dto/upload-image.dto';
 import { UserDocument } from '../user/user.schema';
 import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import * as mongoose from 'mongoose';
+import { UpdateImageDto } from './dto/update-image.dto';
 
 @Injectable()
 export class ImageService {
@@ -63,9 +64,11 @@ export class ImageService {
 
         deleteManyImagesDto.ids.forEach((id) => this.checkIdValidity(id));
 
-        const images = await this.imageModel.find({
-            _id: { $in: deleteManyImagesDto.ids },
-        });
+        const images = await this.imageModel
+            .find({
+                _id: { $in: deleteManyImagesDto.ids },
+            })
+            .populate('owner');
 
         if (!images) {
             throw new NotFoundException('Id not found');
@@ -90,7 +93,7 @@ export class ImageService {
         const { email } = req.user;
 
         this.checkIdValidity(id);
-        const image = await this.imageModel.findById(id);
+        const image = await this.imageModel.findById(id).populate('owner');
 
         if (!image) {
             throw new NotFoundException('Id not found');
@@ -103,6 +106,35 @@ export class ImageService {
         const deleteResponse = await this.awsService.deleteOne(image.key);
         await this.imageModel.findByIdAndDelete(id);
         return { deleted: true, deleteResponse };
+    }
+
+    async updateOne(req, id: string, updateImageDto: UpdateImageDto) {
+        const { email } = req.user;
+
+        this.checkIdValidity(id);
+        const image = await this.imageModel.findById(id).populate('owner');
+
+        if (!image) {
+            throw new NotFoundException('Id not found');
+        }
+
+        if (image.owner.email !== email) {
+            throw new ForbiddenException('You may only edit your own images');
+        }
+
+        const response = await this.imageModel.findByIdAndUpdate(
+            id,
+            {
+                isPublic:
+                    updateImageDto.isPublic === undefined ||
+                    updateImageDto.isPublic === null
+                        ? image.isPublic
+                        : updateImageDto.isPublic,
+                tag: updateImageDto.tag || image.tag,
+            },
+            { new: true },
+        );
+        return { updatedImage: response };
     }
 
     private checkIdValidity(id: string) {
