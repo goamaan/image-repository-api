@@ -38,7 +38,6 @@ export class UserService {
         });
 
         await user.save();
-
         return this.generateResponse(user);
     }
 
