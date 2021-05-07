@@ -64,7 +64,7 @@ export class ImageService {
         req: RequestWithUser,
         deleteManyImagesDto: DeleteManyImagesDto,
     ) {
-        const { email } = req.user;
+        const { email, roles } = req.user;
 
         deleteManyImagesDto.ids.forEach((id) => this.checkIdValidity(id));
 
@@ -77,8 +77,9 @@ export class ImageService {
         if (!images) {
             throw new NotFoundException('Id not found');
         }
+        const isAllowed = images.every((img) => email === img.owner.email);
 
-        if (!images.every((img) => email === img.owner.email)) {
+        if (!isAllowed && !roles.includes('ADMIN')) {
             throw new ForbiddenException('You may only delete your own images');
         }
 
@@ -98,7 +99,7 @@ export class ImageService {
     }
 
     async deleteOne(req: RequestWithUser, id: string) {
-        const { email } = req.user;
+        const { email, roles } = req.user;
 
         this.checkIdValidity(id);
         const image = await this.imageModel.findById(id).populate('owner');
@@ -107,7 +108,7 @@ export class ImageService {
             throw new NotFoundException('Id not found');
         }
 
-        if (image.owner.email !== email) {
+        if (image.owner.email !== email && !roles.includes('ADMIN')) {
             throw new ForbiddenException('You may only delete your own images');
         }
 
@@ -125,7 +126,7 @@ export class ImageService {
         id: string,
         updateImageDto: UpdateImageDto,
     ) {
-        const { email } = req.user;
+        const { email, roles } = req.user;
 
         this.checkIdValidity(id);
         const image = await this.imageModel.findById(id).populate('owner');
@@ -134,7 +135,7 @@ export class ImageService {
             throw new NotFoundException('Id not found');
         }
 
-        if (image.owner.email !== email) {
+        if (image.owner.email !== email && !roles.includes('ADMIN')) {
             throw new ForbiddenException('You may only edit your own images');
         }
 
@@ -171,13 +172,17 @@ export class ImageService {
     async findByTag(req: RequestWithUser, tag: string) {
         const { userId } = req.user;
         const user = await this.userModel.findById(userId);
-        const images = await this.imageModel.find({
-            $or: [
-                { $and: [{ isPublic: true }, { tag }] },
-                { $and: [{ owner: user }, { tag }] },
-            ],
-        });
-
+        let images: ImageDocument[];
+        if (user.roles.includes('ADMIN')) {
+            images = await this.imageModel.find({ tag });
+        } else {
+            images = await this.imageModel.find({
+                $or: [
+                    { $and: [{ isPublic: true }, { tag }] },
+                    { $and: [{ owner: user }, { tag }] },
+                ],
+            });
+        }
         if (images.length === 0 || images === undefined || images === null) {
             return { found: false, images };
         }
@@ -186,7 +191,7 @@ export class ImageService {
     }
 
     async findById(req: RequestWithUser, id: string) {
-        const { email } = req.user;
+        const { email, roles } = req.user;
         this.checkIdValidity(id);
         const image = await this.imageModel.findById(id).populate('owner');
 
@@ -194,7 +199,7 @@ export class ImageService {
             return { found: false, image };
         }
 
-        if (image.owner.email !== email) {
+        if (image.owner.email !== email && !roles.includes('ADMIN')) {
             throw new ForbiddenException('Unauthorized');
         }
 
