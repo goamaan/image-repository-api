@@ -1,4 +1,4 @@
-FROM node:carbon
+FROM node:fermium
 WORKDIR /app
 
 # dependencies

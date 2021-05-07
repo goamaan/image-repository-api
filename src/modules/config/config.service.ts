@@ -17,9 +17,6 @@ export class ConfigService {
     private static validateInput(envConfig: EnvConfig): EnvConfig {
         const envVarsSchema: joi.ObjectSchema = joi.object({
             API_ENV: joi.string().valid('dev', 'prod').default('dev'),
-            API_URL: joi.string().uri({
-                scheme: [/https?/],
-            }),
             JWT_SECRET_KEY: joi.string().required(),
             JWT_EXPIRATION_TIME: joi.string().required(),
             DB_URL: joi.string().regex(/^mongodb/),

@@ -1,5 +1,14 @@
 version: '3'
 services:
+    api:
+        container_name: api
+        build: .
+        ports:
+            - '9001:9001'
+        volumes:
+            - .:/app
+        links:
+            - mongo
     mongo:
         image: mongo:latest
         container_name: mongo
@@ -9,14 +18,5 @@ services:
             MONGO_INITDB_DATABASE: image-repository-api
         volumes:
             - data-volume:/data/db
-    api:
-        container_name: api
-        build: .
-        ports:
-            - '9000:9000'
-        volumes:
-            - .:/app
-        links:
-            - mongo
 volumes:
     data-volume:
