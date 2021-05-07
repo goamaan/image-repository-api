@@ -23,6 +23,24 @@ import { RequestWithUser } from 'src/utils/RequestWithUser';
 export class ImageController {
     constructor(private readonly imageService: ImageService) {}
 
+    @Get('')
+    @HttpCode(HttpStatus.OK)
+    async findAllImages(@Req() req: RequestWithUser) {
+        return this.imageService.findAll(req);
+    }
+
+    @Get(':tag')
+    @HttpCode(HttpStatus.OK)
+    async findByTag(@Req() req: RequestWithUser, @Param('tag') tag: string) {
+        return this.imageService.findByTag(req, tag);
+    }
+
+    @Get('/id/:id')
+    @HttpCode(HttpStatus.OK)
+    async findById(@Req() req: RequestWithUser, @Param('id') id: string) {
+        return this.imageService.findById(req, id);
+    }
+
     @Post('upload')
     @UseInterceptors(FilesInterceptor('file'))
     @HttpCode(HttpStatus.CREATED)
@@ -57,17 +75,5 @@ export class ImageController {
         @Body() updateImageDto: UpdateImageDto,
     ) {
         return this.imageService.updateOne(req, id, updateImageDto);
-    }
-
-    @Get('')
-    @HttpCode(HttpStatus.OK)
-    async findAllImages(@Req() req: RequestWithUser) {
-        return this.imageService.findAll(req);
-    }
-
-    @Get(':tag')
-    @HttpCode(HttpStatus.OK)
-    async findByTag(@Req() req: RequestWithUser, @Param('tag') tag: string) {
-        return this.imageService.findByTag(req, tag);
     }
 }

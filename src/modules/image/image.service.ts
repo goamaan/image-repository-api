@@ -187,6 +187,24 @@ export class ImageService {
         return { found: true, images };
     }
 
+    async findById(req: RequestWithUser, id: string) {
+        const { email } = req.user;
+        this.checkIdValidity(id);
+        const image = await this.imageModel.findById(id).populate('owner');
+
+        if (image === undefined || image === null) {
+            return { found: false, image };
+        }
+
+        if (image.owner.email !== email) {
+            throw new ForbiddenException('Unauthorized');
+        }
+
+        const { tag, isPublic, url, key, name, _id } = image;
+
+        return { found: true, image: { tag, isPublic, url, key, name, _id } };
+    }
+
     private checkIdValidity(id: string) {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new BadRequestException(`${id} is not a valid Object Id`);
