@@ -161,7 +161,11 @@ export class ImageService {
             $or: [{ isPublic: true }, { owner: user }],
         });
 
-        return images;
+        if (images.length === 0 || images === undefined || images === null) {
+            return { found: false, images };
+        }
+
+        return { found: true, images };
     }
 
     async findByTag(req: RequestWithUser, tag: string) {
@@ -174,7 +178,13 @@ export class ImageService {
             ],
         });
 
-        return images;
+        if (images.length === 0 || images === undefined || images === null) {
+            return { found: false, images };
+        }
+
+        console.log(images);
+
+        return { found: true, images };
     }
 
     private checkIdValidity(id: string) {
