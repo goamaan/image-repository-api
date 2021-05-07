@@ -61,7 +61,13 @@ export class ImageController {
 
     @Get('')
     @HttpCode(HttpStatus.OK)
-    async findAllUser(@Req() req: RequestWithUser) {
+    async findAllImages(@Req() req: RequestWithUser) {
         return this.imageService.findAll(req);
+    }
+
+    @Get(':tag')
+    @HttpCode(HttpStatus.OK)
+    async findByTag(@Req() req: RequestWithUser, @Param('tag') tag: string) {
+        return this.imageService.findByTag(req, tag);
     }
 }
