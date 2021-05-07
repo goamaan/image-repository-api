@@ -13,7 +13,6 @@ import { UserDocument, UserSchema } from '../user/user.schema';
 import { ConfigModule } from '../config/config.module';
 import { RequestWithUser } from 'src/utils/RequestWithUser';
 import { UpdateImageDto } from './dto/update-image.dto';
-import * as mongoose from 'mongoose';
 
 describe('UserService', () => {
     let service: ImageService;
@@ -102,18 +101,6 @@ describe('UserService', () => {
                 mockData.image._id,
                 mockUpdate,
             ),
-        ).resolves.toEqual({
-            updatedImage: {
-                _id: '60944aa9b5315a60c8e5d7f8',
-                url:
-                    'https://image-repository-api.s3.ca-central-1.amazonaws.com/user-images/609443f8c88073579a600a49-2021-05-06T19%3A59%3A16.738Z-me_in_capilano.jpg',
-                name: 'me_in_capilano.jpg',
-                key:
-                    'user-images/609443f8c88073579a600a49-2021-05-06T19:59:16.738Z-me_in_capilano.jpg',
-                owner: '609443f8c88073579a600a49',
-                tag: 'newAmaan',
-                isPublic: 'false',
-            },
-        });
+        ).resolves.toHaveProperty('updatedImage');
     });
 });

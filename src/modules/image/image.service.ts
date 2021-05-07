@@ -153,6 +153,17 @@ export class ImageService {
         return { updatedImage: response };
     }
 
+    async findAll(req: RequestWithUser) {
+        const { userId } = req.user;
+        const user = await this.userModel.findById(userId);
+
+        const images = await this.imageModel.find({
+            $or: [{ isPublic: true }, { owner: user }],
+        });
+
+        return images;
+    }
+
     private checkIdValidity(id: string) {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new BadRequestException(`${id} is not a valid Object Id`);

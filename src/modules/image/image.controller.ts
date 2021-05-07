@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
     HttpCode,
     HttpStatus,
     Param,
@@ -56,5 +57,11 @@ export class ImageController {
         @Body() updateImageDto: UpdateImageDto,
     ) {
         return this.imageService.updateOne(req, id, updateImageDto);
+    }
+
+    @Get('')
+    @HttpCode(HttpStatus.OK)
+    async findAllUser(@Req() req: RequestWithUser) {
+        return this.imageService.findAll(req);
     }
 }
