@@ -182,8 +182,6 @@ export class ImageService {
             return { found: false, images };
         }
 
-        console.log(images);
-
         return { found: true, images };
     }
 
@@ -203,6 +201,16 @@ export class ImageService {
         const { tag, isPublic, url, key, name, _id } = image;
 
         return { found: true, image: { tag, isPublic, url, key, name, _id } };
+    }
+
+    async findAllAdmin() {
+        const images = await this.imageModel.find({});
+
+        if (images.length === 0 || images === undefined || images === null) {
+            return { found: false, images };
+        }
+
+        return { found: true, images };
     }
 
     private checkIdValidity(id: string) {

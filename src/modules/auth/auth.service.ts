@@ -13,7 +13,11 @@ export class AuthService {
     ) {}
 
     async createAccessToken(user: UserDocument) {
-        const payload = { email: user.email, userId: user._id };
+        const payload = {
+            email: user.email,
+            userId: user._id,
+            roles: user.roles,
+        };
         return this.jwtService.sign(payload);
     }
 
@@ -24,6 +28,6 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
-        return { email: user.email, userId: user._id };
+        return { email: user.email, userId: user._id, roles: user.roles };
     }
 }

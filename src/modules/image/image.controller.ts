@@ -10,6 +10,7 @@ import {
     Put,
     Req,
     UploadedFiles,
+    UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -18,8 +19,11 @@ import { DeleteManyImagesDto } from './dto/deleteMany-image.dto';
 import { ImageService } from './image.service';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { RequestWithUser } from 'src/utils/RequestWithUser';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('api/v1/images')
+@UseGuards(RolesGuard)
 export class ImageController {
     constructor(private readonly imageService: ImageService) {}
 
@@ -29,7 +33,7 @@ export class ImageController {
         return this.imageService.findAll(req);
     }
 
-    @Get(':tag')
+    @Get('/tag/:tag')
     @HttpCode(HttpStatus.OK)
     async findByTag(@Req() req: RequestWithUser, @Param('tag') tag: string) {
         return this.imageService.findByTag(req, tag);
@@ -39,6 +43,13 @@ export class ImageController {
     @HttpCode(HttpStatus.OK)
     async findById(@Req() req: RequestWithUser, @Param('id') id: string) {
         return this.imageService.findById(req, id);
+    }
+
+    @Get('/all')
+    @HttpCode(HttpStatus.OK)
+    @Roles('ADMIN')
+    async findAllImagesAdmin() {
+        return this.imageService.findAllAdmin();
     }
 
     @Post('upload')

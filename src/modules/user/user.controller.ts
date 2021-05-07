@@ -1,4 +1,13 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Body,
+    HttpCode,
+    HttpStatus,
+    Req,
+    Get,
+} from '@nestjs/common';
+import { RequestWithUser } from 'src/utils/RequestWithUser';
 import { Public } from '../auth/decorators/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -20,5 +29,11 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     async login(@Body() loginUserDto: LoginUserDto) {
         return await this.userService.login(loginUserDto);
+    }
+
+    @Get('/profile')
+    @HttpCode(HttpStatus.OK)
+    async profile(@Req() req: RequestWithUser) {
+        return await this.userService.get(req.user.userId);
     }
 }
