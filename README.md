@@ -23,8 +23,6 @@ This is an Image Repository API built with NestJs (Typescript), MongoDB (Mongoos
 
 ## Features
 
-Shopify Backend Developer Internship Challenge Checklist
-
 -   [x] SEARCH function
     -   [ ] from characteristics of the images
     -   [x] from text (using user submitted tags)
@@ -57,7 +55,7 @@ Shopify Backend Developer Internship Challenge Checklist
 
 Using Typescript (with NestJS) makes it easy to adhere to the SOLID design principles, as NestJS has a [Spring Boot](https://spring.io/) like architecture - using modules, controllers, services, guards, and DTOs.
 
-Separating routing into controllers and data-fetching/storage/calculation logic into services make it easy to design modules that ensure the Single Responsibility Principle, and make classes easy to extend.
+Separating routing into controllers and data-fetching/storage/calculation logic into services make it easy to design modules that ensure the Single Responsibility Principle, and make classes easy to extend. NestJS also provides a dependency injection architecture to achieve inversion of control.
 
 [Back to Top](#Table-of-Contents)
 
@@ -198,7 +196,7 @@ GET - "/api/v1/images/tag/:tag"
 
 ### Admin Only
 
-This route does not serve much purpose but it showcases role based routes - only users with a `roles` property that includes `'ADMIN'` are authorized to access this path
+This route does not serve much purpose but it showcases role based routes - only users with a `roles` property that includes `'ADMIN'` are authorized to access this path. It returns all images, public and private.
 
 ```typescript
 GET - '/api/v1/images/all';
