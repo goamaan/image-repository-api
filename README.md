@@ -4,11 +4,72 @@ This is an Image Repository API built with NestJs (Typescript), MongoDB (Mongoos
 
 ---
 
+## Table of Contents
+
+-   [Features](#Features)
+-   [SOLID](#SOLID)
+-   [Setup](#Setup)
+    -   [Without Docker](#Without-Docker)
+    -   [Using Docker](#Docker)
+-   [Environment](#Environment)
+-   [Usage](#Usage)
+    -   [Access Token](#Access-Token)
+    -   [Image Upload](#Image-Upload)
+-   [Endpoints](#Endpoints)
+    -   [Public](#Public)
+    -   [Protected](#Protected)
+    -   [Admin only](#Admin-only)
+-   [Testing](#Testing)
+
+## Features
+
+Shopify Backend Developer Internship Challenge Checklist
+
+-   [x] SEARCH function
+    -   [ ] from characteristics of the images
+    -   [x] from text (using user submitted tags)
+    -   [ ] from an image (search for similar images)
+-   [x] ADD image(s) to the repository
+    -   [x] one / bulk / enormous amount of images
+    -   [x] private or public (permissions)
+    -   [x] secure uploading and stored images
+-   [x] DELETE image(s)
+    -   [x] one / bulk / selected / all images
+    -   [x] Prevent a user deleting images from another user (access control)
+    -   [x] secure deletion of images
+-   [ ] SELL/BUY images
+    -   [ ] ability to manage inventory
+    -   [ ] set price
+    -   [ ] discounts
+    -   [ ] handle money
+-   [x] User Authentication
+    -   [x] JSON Web Tokens (JWT)
+    -   [ ] Refresh Tokens to improve JWT security
+-   [x] User Authorization
+    -   [x] Role-based authorization
+    -   [x] Public/Protected/Admin Routes
+
+[Back to Top](#Table-of-Contents)
+
+---
+
+## SOLID
+
+Using Typescript (with NestJS) makes it easy to adhere to the SOLID design principles, as NestJS has a [Spring Boot](https://spring.io/) like architecture - using modules, controllers, services, guards, and DTOs.
+
+Separating routing into controllers and data-fetching/storage/calculation logic into services make it easy to design modules that ensure the Single Responsibility Principle, and make classes easy to extend.
+
+[Back to Top](#Table-of-Contents)
+
+---
+
 ## Setup
 
 ### Without Docker
 
-This will require that you have MongoDB installed and running on your computer. If you have Docker and Docker-compose installed check the second method below.
+This will require that you have either MongoDB installed and running on your computer, or a free account on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) with a database instance created. Copy the connection string (URI) and paste it in `.env.example`.
+
+If you have Docker and Docker-compose installed you can also use the [second method](#Docker).
 
 -   Clone the repo, and then install dependencies using either npm
 
@@ -22,7 +83,7 @@ or yarn
 yarn
 ```
 
-The `ConfigService` uses environment variables found in a `.env` file in the root folder, so make sure to fill in the required variable in `.env.example` and then
+The `ConfigService` uses environment variables found in a `.env` file in the root folder, so make sure to fill in the required variables in `.env.example` and then
 
 ```bash
 cp .env.example .env
@@ -52,6 +113,8 @@ This may take some time on first launch as it will pull the node and mongo image
 
 This will expose the API on `localhost:9001` and mongo on `localhost:27017`
 
+[Back to Top](#Table-of-Contents)
+
 ---
 
 ## Environment
@@ -71,6 +134,8 @@ This will expose the API on `localhost:9001` and mongo on `localhost:27017`
 **AWS_ACCESS_KEY_ID** - Access key ID that can be generated from the Management console -> Access keys
 
 **AWS_SECRET_KEY** - Secret key generated along with the access key
+
+[Back to Top](#Table-of-Contents)
 
 ---
 
@@ -93,6 +158,10 @@ I recommend using Postman to send requests to the API:
 -   Also attach an `isPublic` boolean attribute for a request, indicating whether the images are public or private.
 
 ![postman-image-upload](postman-image-upload.png)
+
+[Back to Top](#Table-of-Contents)
+
+---
 
 ## Endpoints
 
@@ -135,26 +204,28 @@ This route does not serve much purpose but it showcases role based routes - only
 GET - '/api/v1/images/all';
 ```
 
-## Testing
-
-### Using Docker
-
-```bash
-# unit tests
-$ docker exec -it nest yarn test
-
-# end to end
-$ docker exec -it nest yarn test:e2e
-```
-
-### Without Docker
-
-```bash
-# unit tests
-$ npm run test
-
-# end to end tests
-$ npm run test:e2e
-```
+[Back to Top](#Table-of-Contents)
 
 ---
+
+## Testing
+
+Tests are included inside their respective modules and end with a `*.spec.ts`.
+
+Authentication and User routing (controller) tests are part of the End-to-end tests in the `test/app.e2e-spec.ts` file.
+
+```bash
+# Using docker
+
+    # unit tests
+    $ docker exec -it api yarn test
+    # end to end
+    $ docker exec -it api yarn test:e2e
+
+# Without docker
+
+    # unit tests
+    $ npm run test
+    # end to end tests
+    $ npm run test:e2e
+```
